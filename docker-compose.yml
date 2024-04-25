@@ -1,0 +1,34 @@
+version: '3'
+
+services:
+  prover:
+    image: email-wallet-prover
+    build:
+      context: .
+    ports:
+      - "8080:8080"
+    tty: true
+    stdin_open: true
+  db:
+    image: postgres
+    environment:
+      - POSTGRES_PASSWORD=p@ssw0rd
+      - POSTGRES_USER=emailwallet
+      - POSTGRES_DB=emailwallet
+    ports:
+      - "5433:5432"
+  relayer:
+    image: email-wallet-relayer
+    build:
+      context: ./email-wallet
+      dockerfile: Relayer.Dockerfile
+      args:
+        - modal_token_id=ak-QwCMvdQy97wHJqZYnOr2uD
+        - modal_token_secret=as-qo3gD7gcWqC7cXWXtM5QQB
+
+    entrypoint: /bin/sh
+    command: -c "sleep 10000000"
+    ports:
+      - "81:80"
+    volumes:
+      - "./email-wallet/packages/relayer/.env:/code/email-wallet/packages/relayer/.env"
