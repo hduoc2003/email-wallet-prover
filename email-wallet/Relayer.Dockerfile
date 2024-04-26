@@ -1,17 +1,21 @@
 FROM rustlang/rust:nightly
 
-RUN apt-get update && apt-get upgrade -y
-RUN apt-get update && \
-    apt install -y cmake build-essential pkg-config libssl-dev libgmp-dev libsodium-dev nasm git awscli gcc nodejs npm vim
+RUN apt-get update
+RUN apt install -y cmake build-essential \
+    pkg-config libssl-dev libgmp-dev \
+    libsodium-dev nasm git awscli \
+    gcc nodejs npm vim
+
+RUN apt install -y iputils-ping nano
 
 # Node install
-RUN npm install -g n
-RUN n 18
-RUN npm install -g yarn
+# RUN npm install -g n
+# RUN n 18
+# RUN npm install -g yarn
 
 WORKDIR /email-wallet
 COPY . .
-RUN yarn
+# RUN yarn
 
 WORKDIR /email-wallet/packages/relayer
 COPY packages/relayer/.env ./.env

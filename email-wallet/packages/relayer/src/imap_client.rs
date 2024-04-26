@@ -69,7 +69,7 @@ impl ImapClient {
                 Ok(stream) => {
                     stream
                 },
-                Err(E) => {
+                Err(_) => {
                     warn!(LOG, "Invalid or self-signed certificate");
                     let mut tls_connector = async_native_tls::TlsConnector::new();
                     tls_connector = tls_connector.danger_accept_invalid_certs(true);
