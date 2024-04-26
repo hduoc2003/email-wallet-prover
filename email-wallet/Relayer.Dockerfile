@@ -9,8 +9,8 @@ RUN npm install -g n
 RUN n 18
 RUN npm install -g yarn
 
-RUN git clone https://github.com/zkemail/email-wallet.git
 WORKDIR /email-wallet
+COPY . .
 RUN yarn
 
 WORKDIR /email-wallet/packages/relayer
@@ -18,15 +18,6 @@ COPY packages/relayer/.env ./.env
 # COPY packages/relayer/scripts/ ./scripts # FIXME: It's for testing
 RUN cargo build --release
 
-WORKDIR /email-wallet/packages/prover
-RUN apt-get update && apt-get install -y python3.10 python3-distutils python3-pip python3-apt
-RUN pip install modal --break-system-packages
-ARG modal_token_id
-ARG modal_token_secret
-RUN modal token set --token-id ${modal_token_id} --token-secret ${modal_token_secret}
-RUN nohup modal serve modal_server.py
-
-WORKDIR /email-wallet/packages/relayer
 CMD [ "/bin/bash", "-c", "/email-wallet/packages/relayer/scripts/startup.sh"]
 
 

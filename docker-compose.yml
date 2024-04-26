@@ -2,9 +2,7 @@ version: '3'
 
 services:
   prover:
-    image: email-wallet-prover
-    build:
-      context: .
+    image: hduoc2003/email-wallet-prover
     ports:
       - "8080:8080"
     tty: true
@@ -17,18 +15,27 @@ services:
       - POSTGRES_DB=emailwallet
     ports:
       - "5433:5432"
+    volumes:
+      - "./mount-data:/var/lib/postgresql/data"
   relayer:
     image: email-wallet-relayer
     build:
       context: ./email-wallet
       dockerfile: Relayer.Dockerfile
-      args:
-        - modal_token_id=ak-QwCMvdQy97wHJqZYnOr2uD
-        - modal_token_secret=as-qo3gD7gcWqC7cXWXtM5QQB
+      # args:
+      #   - modal_token_id=ak-QwCMvdQy97wHJqZYnOr2uD
+      #   - modal_token_secret=as-qo3gD7gcWqC7cXWXtM5QQB
 
     entrypoint: /bin/sh
     command: -c "sleep 10000000"
-    ports:
-      - "81:80"
+    network_mode: host
+    # ports:
+    #   - "81:80"
     volumes:
-      - "./email-wallet/packages/relayer/.env:/code/email-wallet/packages/relayer/.env"
+      - "./email-wallet/packages/relayer/.env:/email-wallet/packages/relayer/.env"
+      # - "./email-wallet:/email-wallet"
+    stdin_open: true
+    tty: true
+    depends_on:
+      - prover
+      - db

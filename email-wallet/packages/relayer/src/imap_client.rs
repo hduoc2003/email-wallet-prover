@@ -11,6 +11,7 @@ use oauth2::{
     basic::BasicClient, AuthUrl, AuthorizationCode, ClientId, ClientSecret, CsrfToken,
     PkceCodeChallenge, RedirectUrl, Scope, TokenResponse, TokenUrl,
 };
+use slog::warn;
 use tokio::net::TcpStream;
 
 #[derive(Clone)]
@@ -63,7 +64,19 @@ impl ImapClient {
     pub(crate) async fn new(config: ImapConfig) -> Result<Self> {
         let tcp_stream = TcpStream::connect((&*config.domain_name, config.port)).await?;
         let tls = async_native_tls::TlsConnector::new();
-        let tls_stream = tls.connect(&*config.domain_name, tcp_stream).await?;
+        let tls_stream: TlsStream<TcpStream> = {
+            match tls.connect(&*config.domain_name, tcp_stream).await {
+                Ok(stream) => {
+                    stream
+                },
+                Err(E) => {
+                    warn!(LOG, "Invalid or self-signed certificate");
+                    let mut tls_connector = async_native_tls::TlsConnector::new();
+                    tls_connector = tls_connector.danger_accept_invalid_certs(true);
+                    tls_connector.connect(&*config.domain_name, TcpStream::connect((&*config.domain_name, config.port)).await?).await?
+                }
+            }
+        };
         let client = async_imap::Client::new(tls_stream);
 
         let mut session = match config.auth.clone() {

@@ -1,1 +1,4 @@
 .env
+/mount-data
+*/target
+temp_env
