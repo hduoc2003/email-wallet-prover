@@ -6,9 +6,9 @@ dataSources:
     name: EmailWalletCore
     network: sepolia
     source:
-      address: "0xBaBE00020e40F75BaF97DAB202228FbC4b9F9214"
+      address: "0xC6033ceD4a15Cac6A65e617199Eb4f67b9Fe1c2d"
       abi: EmailWalletCore
-      startBlock: 4796719
+      startBlock: 5780671
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -27,9 +27,9 @@ dataSources:
     name: RelayerHandler
     network: sepolia
     source:
-      address: "0x34246a80f161D6471357270914D8a7C37224902a"
+      address: "0x70789791b85Fd682A89427320DBb7802C29EAff2"
       abi: RelayerHandler
-      startBlock: 4796719
+      startBlock: 5780670
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -50,9 +50,9 @@ dataSources:
     name: AccountHandler
     network: sepolia
     source:
-      address: "0x50ea0748316e3d6823cc27CE3A8ceA5EE3b1B792"
+      address: "0xC5C6F0d0444B29d83c8a93B9cB3C2FF3336AD203"
       abi: AccountHandler
-      startBlock: 4796719
+      startBlock: 5780671
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -76,9 +76,9 @@ dataSources:
     name: UnclaimsHandler
     network: sepolia
     source:
-      address: "0x8f38E289Dd734C1533Ea0acBD63ad490bA906384"
+      address: "0x75183FCeB95fE307000596ea0bd8CE13b9761268"
       abi: UnclaimsHandler
-      startBlock: 4796719
+      startBlock: 5780671
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -113,9 +113,9 @@ dataSources:
     name: ExtensionHandler
     network: sepolia
     source:
-      address: "0xcCcfE37B8c02B4cCFea9fD5645f72eAc52570Eaf"
+      address: "0x0395eE26011cc804c6874f9B6071bA5DfEa4580E"
       abi: ExtensionHandler
-      startBlock: 4796719
+      startBlock: 5780670
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7

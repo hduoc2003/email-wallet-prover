@@ -33,7 +33,8 @@ services:
     #   - "81:80"
     volumes:
       - "./email-wallet/packages/relayer/.env:/email-wallet/packages/relayer/.env"
-      - "./email-wallet:/email-wallet"
+      - "./email-wallet/packages/subgraph/subgraph.yaml:/email-wallet/packages/subgraph/subgraph.yaml"
+      # - "./email-wallet:/email-wallet"
     stdin_open: true
     tty: true
     depends_on:
