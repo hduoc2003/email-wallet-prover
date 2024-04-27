@@ -1,4 +1,7 @@
 Relayer.Dockerfile
 .dockerignore
 README.md
-*/target/
+target/
+*/.vscode/
+*/.idea/
+*.log
