@@ -3,3 +3,5 @@
 */target
 temp_env
 .vscode
+.idea/
+*.log

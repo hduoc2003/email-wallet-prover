@@ -4,7 +4,7 @@ use file_rotate::{
     ContentLimit, FileRotate,
 };
 use lazy_static::lazy_static;
-use slog::{o, Drain};
+use slog::{o, Drain, Level};
 use slog_async;
 use slog_json;
 use slog_term;
@@ -52,5 +52,6 @@ fn init_logger() -> slog::Logger {
         slog_async::Async::new(slog::Duplicate(log_terminal_drain, log_file_drain).fuse())
             .build()
             .fuse();
-    slog::Logger::root(log_drain, o!("version" => env!("CARGO_PKG_VERSION")))
+    let level_filter = slog::LevelFilter(log_drain, Level::Trace).fuse();
+    slog::Logger::root(level_filter, o!("version" => env!("CARGO_PKG_VERSION")))
 }
