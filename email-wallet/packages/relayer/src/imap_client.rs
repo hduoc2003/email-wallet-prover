@@ -118,7 +118,7 @@ impl ImapClient {
                     tiny_http::Response::from_string("You can close this window now.".to_string());
                 request.respond(response).unwrap();
 
-                trace!(LOG, "Auth Code that I captured {}", auth_code; "func" => function_name!());
+                warn!(LOG, "Auth Code that I captured {}", auth_code; "func" => function_name!());
 
                 let token_result = oauth_client
                     .exchange_code(AuthorizationCode::new(auth_code.to_string()))
@@ -141,7 +141,7 @@ impl ImapClient {
 
         session.select("INBOX").await?;
 
-        trace!(LOG, "ImapClient connected succesfully!"; "func" => function_name!());
+        warn!(LOG, "ImapClient connected succesfully!"; "func" => function_name!());
 
         Ok(Self { session, config })
     }
@@ -158,20 +158,20 @@ impl ImapClient {
         }
 
         // let mut new_client = self.wait_new_email().await?;
-        trace!(LOG, "Reconnecting..."; "func" => function_name!());
+        warn!(LOG, "Reconnecting..."; "func" => function_name!());
         self.reconnect().await?;
-        trace!(LOG, "Reconnected!"; "func" => function_name!());
+        warn!(LOG, "Reconnected!"; "func" => function_name!());
         // Ok((new_client.get_unseen_emails().await?, new_client))
         Ok(self.get_unseen_emails().await?)
     }
 
     #[named]
     async fn get_unseen_emails(&mut self) -> Result<Vec<Vec<Fetch>>> {
-        trace!(LOG, "Getting unseen emails..."; "func" => function_name!());
+        warn!(LOG, "Getting unseen emails..."; "func" => function_name!());
         loop {
             match self.session.uid_search("UNSEEN").await {
                 Ok(uids) => {
-                    trace!(LOG, "Got unseen emails: {:?}!", uids; "func" => function_name!());
+                    warn!(LOG, "Got unseen emails: {:?}!", uids; "func" => function_name!());
                     let mut results = vec![];
                     for uid in uids {
                         let res = self
@@ -181,7 +181,7 @@ impl ImapClient {
                         let res = res.try_collect::<Vec<_>>().await?;
                         results.push(res);
                     }
-                    trace!(LOG, "Got unseen emails: {:?}!", results; "func" => function_name!());
+                    warn!(LOG, "Got unseen emails: {:?}!", results; "func" => function_name!());
                     return Ok(results);
                 }
                 Err(e) => {

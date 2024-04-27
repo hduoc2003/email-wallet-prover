@@ -78,7 +78,7 @@ impl PSIClient {
             // let subgraph_client = SubgraphClient::new();
             // let account_key = AccountKey::from(hex2field(&account_key)?);
             // let wallet_salt = account_key.to_wallet_salt()?;
-            // trace!("Wallet salt: {}", field2hex(&wallet_salt.0));
+            // warn!("Wallet salt: {}", field2hex(&wallet_salt.0));
             // let wallet_addr = chain_client
             //     .get_wallet_addr_from_salt(&wallet_salt.0)
             //     .await?;

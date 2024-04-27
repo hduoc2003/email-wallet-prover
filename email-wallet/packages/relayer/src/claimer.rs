@@ -4,6 +4,7 @@ use crate::*;
 
 use ethers::types::Address;
 use ethers::utils::format_units;
+use slog::warn;
 use tokio::sync::mpsc::UnboundedSender;
 
 pub(crate) struct Claim {
@@ -103,9 +104,9 @@ pub(crate) async fn claim_unclaims(
     .await?;
     let (proof, pub_signals) =
         generate_proof(&input, "claim", PROVER_ADDRESS.get().unwrap()).await?;
-    info!(LOG, "original commit {}", claim.commit; "func" => function_name!());
-    info!(LOG, "original randomness {}", claim.random; "func" => function_name!());
-    info!(LOG, "commit in pub signals: {}", pub_signals[2]; "func" => function_name!());
+    warn!(LOG, "original commit {}", claim.commit; "func" => function_name!());
+    warn!(LOG, "original randomness {}", claim.random; "func" => function_name!());
+    warn!(LOG, "commit in pub signals: {}", pub_signals[2]; "func" => function_name!());
     let data = ClaimInput {
         id: claim.id,
         email_addr_pointer: u256_to_bytes32(&pub_signals[1]),

@@ -1,3 +1,4 @@
+use slog::warn;
 use crate::*;
 
 use sqlx::{postgres::PgPool, Row};
@@ -74,7 +75,7 @@ impl Database {
     // }
 
     // pub(crate) async fn insert_email(&self, email_hash: &str, email: &str) -> Result<()> {
-    //     info!("email_hash {}", email_hash);
+    //     warn!("email_hash {}", email_hash);
     //     let row = sqlx::query(
     //         "INSERT INTO emails (email_hash, email) VALUES ($1 $2) REtURNING (email_hash)",
     //     )
@@ -82,7 +83,7 @@ impl Database {
     //     .bind(email)
     //     .fetch_one(&self.db)
     //     .await?;
-    //     info!("inserted row: {}", row.get::<String, _>("email_hash"));
+    //     warn!("inserted row: {}", row.get::<String, _>("email_hash"));
     //     Ok(())
     // }
 
@@ -92,7 +93,7 @@ impl Database {
     //         .execute(&self.db)
     //         .await?
     //         .rows_affected();
-    //     info!("deleted {} rows", row_affected);
+    //     warn!("deleted {} rows", row_affected);
 
     //     Ok(())
     // }
@@ -125,7 +126,7 @@ impl Database {
         .bind(is_onborded)
         .fetch_one(&self.db)
         .await?;
-        info!(
+        warn!(
             LOG,
             "inserted row: {}",
             row.get::<String, _>("email_address"); "func" => function_name!()
@@ -203,7 +204,7 @@ impl Database {
     #[named]
     pub(crate) async fn get_claims_unexpired(&self, now: i64) -> Result<Vec<Claim>> {
         let mut vec = Vec::new();
-        info!(LOG, "now {}", now; "func" => function_name!());
+        warn!(LOG, "now {}", now; "func" => function_name!());
         let rows =
             sqlx::query("SELECT * FROM claims WHERE expiry_time > $1 AND is_deleted = FALSE")
                 .bind(now)
@@ -234,7 +235,7 @@ impl Database {
     #[named]
     pub(crate) async fn get_claims_expired(&self, now: i64) -> Result<Vec<Claim>> {
         let mut vec = Vec::new();
-        info!(LOG, "now {}", now; "func" => function_name!());
+        warn!(LOG, "now {}", now; "func" => function_name!());
         let rows =
             sqlx::query("SELECT * FROM claims WHERE expiry_time < $1 AND is_deleted = FALSE")
                 .bind(now)
@@ -264,7 +265,7 @@ impl Database {
 
     #[named]
     pub(crate) async fn insert_claim(&self, claim: &Claim) -> Result<()> {
-        info!(LOG, "expiry_time {}", claim.expiry_time; "func" => function_name!());
+        warn!(LOG, "expiry_time {}", claim.expiry_time; "func" => function_name!());
         let row = sqlx::query(
             "INSERT INTO claims (id, email_address, random, email_addr_commit, expiry_time, is_fund, is_announced) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *",
         )
@@ -277,7 +278,7 @@ impl Database {
         .bind(claim.is_announced)
         .fetch_one(&self.db)
         .await?;
-        info!(
+        warn!(
             LOG,
             "inserted row: {}",
             row.get::<String, _>("email_addr_commit"); "func" => function_name!()

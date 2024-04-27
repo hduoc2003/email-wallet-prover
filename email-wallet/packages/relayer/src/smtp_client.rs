@@ -432,7 +432,7 @@ pub(crate) async fn error_email_if_needed(
     let wallet_addr = chain_client
         .get_wallet_addr_from_salt(&wallet_salt.0)
         .await?;
-    debug!(LOG, "wallet_addr: {}", wallet_addr);
+    warn!(LOG, "wallet_addr: {}", wallet_addr);
 
     if error.contains("Contract call reverted with data: ") {
         let revert_data = error

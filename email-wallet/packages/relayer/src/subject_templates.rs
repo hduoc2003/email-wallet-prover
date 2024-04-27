@@ -31,7 +31,7 @@ impl TemplateValue {
         match self {
             Self::TokenAmount { token_name, amount } => {
                 let amount_u256 = Self::amount_to_uint(amount, amount_decimal_size.unwrap());
-                info!(LOG, "amount_u256: {}", amount_u256; "func" => function_name!());
+                warn!(LOG, "amount_u256: {}", amount_u256; "func" => function_name!());
                 Ok(Bytes::from(abi::encode(&[
                     Token::Uint(amount_u256),
                     Token::String(token_name.clone()),

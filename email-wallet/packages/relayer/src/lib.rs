@@ -48,7 +48,7 @@ use anyhow::{anyhow, bail, Result};
 use dotenv::dotenv;
 use email_wallet_utils::{converters::*, cryptos::*, parse_email::ParsedEmail, Fr};
 use ethers::prelude::*;
-use slog::{debug, error, info, trace};
+use slog::{debug, error, info, trace, warn};
 use std::env;
 use std::path::PathBuf;
 use std::sync::atomic::AtomicU32;
@@ -104,7 +104,7 @@ pub async fn setup() -> Result<()> {
 
 #[named]
 pub async fn run(config: RelayerConfig) -> Result<()> {
-    info!(LOG, "Starting relayer"; "func" => function_name!());
+    warn!(LOG, "Starting relayer"; "func" => function_name!());
 
     CIRCUITS_DIR_PATH.set(config.circuits_dir_path).unwrap();
     WEB_SERVER_ADDRESS.set(config.web_server_address).unwrap();
@@ -356,7 +356,7 @@ pub async fn run(config: RelayerConfig) -> Result<()> {
             // let now = now();
             // let claims = db_clone.get_claims_expired(now).await?;
             // for claim in claims {
-            //     info!(LOG, "Voiding claim for : {}", claim.email_address);
+            //     warn!(LOG, "Voiding claim for : {}", claim.email_address);
             //     tokio::task::spawn(
             //         void_unclaims(
             //             claim,
@@ -406,7 +406,7 @@ async fn emails_pool_fetcher_fn(
     let emails_pool = FileEmailsPool::new();
     let unhandled_emails = emails_pool.get_unhandled_emails().await?;
     for (email_hash, _) in unhandled_emails {
-        info!(LOG, "unhandled email {}", email_hash; "func" => function_name!());
+        warn!(LOG, "unhandled email {}", email_hash; "func" => function_name!());
         tx_handler_for_fetcher_task.send(email_hash)?;
     }
     sleep(Duration::from_secs(30)).await;
@@ -419,12 +419,12 @@ async fn email_receiver_fn(
     tx_handler_for_receiver_task: &UnboundedSender<String>,
 ) -> Result<()> {
     let fetches = email_receiver.retrieve_new_emails().await?;
-    info!(LOG, "Fetched {} emails", fetches.len(); "func" => function_name!());
+    warn!(LOG, "Fetched {} emails", fetches.len(); "func" => function_name!());
     for fetch in fetches {
         for email in fetch.iter() {
             if let Some(body) = email.body() {
                 let body = String::from_utf8(body.to_vec())?;
-                info!(LOG, "Received email {}", body; "func" => function_name!());
+                warn!(LOG, "Received email {}", body; "func" => function_name!());
                 let email_hash = calculate_default_hash(&body);
                 let emails_pool = FileEmailsPool::new();
                 if !emails_pool.contains_email(&email_hash).await? {
@@ -451,10 +451,10 @@ async fn email_handler_fn(
         .recv()
         .await
         .ok_or(anyhow!(CANNOT_GET_EMAIL_FROM_QUEUE))?;
-    info!(LOG, "Handling email hash {}", email_hash; "func" => function_name!());
+    warn!(LOG, "Handling email hash {}", email_hash; "func" => function_name!());
     let emails_pool = FileEmailsPool::new();
     let email = emails_pool.get_email_by_hash(&email_hash).await?;
-    info!(LOG, "Handled email {}", email; "func" => function_name!());
+    warn!(LOG, "Handled email {}", email; "func" => function_name!());
     let emails_pool = FileEmailsPool::new();
     emails_pool.delete_email(&email_hash).await?;
     tokio::task::spawn(
@@ -496,7 +496,7 @@ async fn account_creation_fn(
         .recv()
         .await
         .ok_or(anyhow!(CANNOT_GET_EMAIL_FROM_QUEUE))?;
-    info!(LOG, "Creating account for email: {}", email_address; "func" => function_name!());
+    warn!(LOG, "Creating account for email: {}", email_address; "func" => function_name!());
     tokio::task::spawn(
         create_account(
             email_address,
@@ -522,7 +522,7 @@ async fn claimer_fn(
         .recv()
         .await
         .ok_or(anyhow!(CANNOT_GET_EMAIL_FROM_QUEUE))?;
-    info!(LOG, "Claiming unclaim for {:?}", claim.email_address; "func" => function_name!());
+    warn!(LOG, "Claiming unclaim for {:?}", claim.email_address; "func" => function_name!());
     tokio::task::spawn(
         claim_unclaims(
             claim,
@@ -545,8 +545,8 @@ async fn email_sender_fn(
         .recv()
         .await
         .ok_or(anyhow!(CANNOT_GET_EMAIL_FROM_QUEUE))?;
-    info!(LOG, "Sending email to: {:?}", email.to; "func" => function_name!());
-    info!(LOG, "Email arg: {:?}", email.email_args; "func" => function_name!());
+    warn!(LOG, "Sending email to: {:?}", email.to; "func" => function_name!());
+    warn!(LOG, "Email arg: {:?}", email.email_args; "func" => function_name!());
     email_sender.send_new_email(email).await?;
     Ok(())
 }
@@ -582,12 +582,12 @@ async fn catch_claims_in_db_fn(
     let now = now();
     let claims = db_clone.get_claims_unexpired(now).await?;
     for claim in claims {
-        info!(LOG, "Claiming claim for : {}", claim.email_address; "func" => function_name!());
+        warn!(LOG, "Claiming claim for : {}", claim.email_address; "func" => function_name!());
         tx_claimer_for_catcher_task.send(claim)?;
     }
     let claims = db_clone.get_claims_expired(now).await?;
     for claim in claims {
-        info!(LOG, "Voiding claim for : {}", claim.email_address; "func" => function_name!());
+        warn!(LOG, "Voiding claim for : {}", claim.email_address; "func" => function_name!());
         tokio::task::spawn(
             void_unclaims(
                 claim,

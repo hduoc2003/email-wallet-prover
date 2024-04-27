@@ -49,17 +49,17 @@ async fn unclaim(
     tx_claimer: UnboundedSender<Claim>,
 ) -> Result<String> {
     let padded_email_addr = PaddedEmailAddr::from_email_addr(&payload.email_address);
-    info!(
+    warn!(
         LOG,
         "padded email address fields: {:?}",
         padded_email_addr.to_email_addr_fields(); "func" => function_name!()
     );
     let commit = padded_email_addr.to_commitment(&hex2field(&payload.random)?)?;
-    info!(LOG, "commit {:?}", commit; "func" => function_name!());
+    warn!(LOG, "commit {:?}", commit; "func" => function_name!());
     let id = chain_client
         .get_unclaim_id_from_tx_hash(&payload.tx_hash, payload.is_fund)
         .await?;
-    info!(LOG, "id {:?}", id; "func" => function_name!());
+    warn!(LOG, "id {:?}", id; "func" => function_name!());
     let psi_client = PSIClient::new(
         Arc::clone(&chain_client),
         payload.email_address.clone(),
@@ -80,7 +80,7 @@ async fn unclaim(
         is_announced: false,
     };
     tx_claimer.send(claim)?;
-    trace!(LOG, "claim sent to tx_claimer"; "func" => function_name!());
+    warn!(LOG, "claim sent to tx_claimer"; "func" => function_name!());
 
     Ok(format!(
         "Unclaimed {} for {} is accepted",
@@ -104,7 +104,7 @@ pub(crate) async fn run_server(
         .route(
             "/api/emailAddrCommit",
             axum::routing::post(move |payload: String| async move {
-                info!(LOG, "/emailAddrCommit Received payload: {}", payload; "func" => function_name!());
+                warn!(LOG, "/emailAddrCommit Received payload: {}", payload; "func" => function_name!());
                 let json = serde_json::from_str::<EmailAddrCommitRequest>(&payload)
                     .map_err(|_| "Invalid payload json".to_string())
                     .unwrap();
@@ -112,14 +112,14 @@ pub(crate) async fn run_server(
                 let commit = padded_email_addr
                     .to_commitment(&hex2field(&json.random).unwrap())
                     .unwrap();
-                info!(LOG, "commit {:?}", commit; "func" => function_name!());
+                warn!(LOG, "commit {:?}", commit; "func" => function_name!());
                 field2hex(&commit)
             }),
         )
         .route(
             "/api/unclaim",
             axum::routing::post(move |payload: String| async move {
-                info!(LOG, "/unclaim Received payload: {}", payload; "func" => function_name!());
+                warn!(LOG, "/unclaim Received payload: {}", payload; "func" => function_name!());
                 let json = serde_json::from_str::<UnclaimRequest>(&payload)
                     .map_err(|_| "Invalid payload json".to_string())?;
                 unclaim(json, db, chain_client, tx_claimer)
@@ -144,7 +144,7 @@ pub(crate) async fn run_server(
         .route(
             "/api/serveCheck/",
             axum::routing::post(move |payload: String| async move {
-                info!(LOG, "/serveCheck Received payload: {}", payload; "func" => function_name!());
+                warn!(LOG, "/serveCheck Received payload: {}", payload; "func" => function_name!());
                 let json = serde_json::from_str::<CheckRequest>(&payload)
                     .map_err(|_| "Invalid payload json".to_string())?;
                 serve_check_request(json, chain_client_check_clone)
@@ -158,7 +158,7 @@ pub(crate) async fn run_server(
         .route(
             "/api/serveReveal/",
             axum::routing::post(move |payload: String| async move {
-                info!(LOG, "/serveCheck Received payload: {}", payload; "func" => function_name!());
+                warn!(LOG, "/serveCheck Received payload: {}", payload; "func" => function_name!());
                 let json = serde_json::from_str::<RevealRequest>(&payload)
                     .map_err(|_| "Invalid payload json".to_string())?;
                 serve_reveal_request(json, chain_client_reveal_clone, tx_claimer_reveal_clone)
@@ -176,7 +176,7 @@ pub(crate) async fn run_server(
                 .allow_origin(Any),
         );
 
-    trace!(LOG, "Listening API at {}", addr; "func" => function_name!());
+    warn!(LOG, "Listening API at {}", addr; "func" => function_name!());
     axum::Server::bind(&addr.parse()?)
         .serve(app.into_make_service())
         .await?;

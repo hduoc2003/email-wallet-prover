@@ -8,6 +8,7 @@ use ethers::abi::RawLog;
 use ethers::middleware::Middleware;
 use ethers::prelude::*;
 use ethers::signers::Signer;
+use slog::warn;
 
 const CONFIRMATIONS: usize = 1;
 
@@ -314,7 +315,7 @@ impl ChainClient {
             if let Ok(decoded) = EmailWalletEventsEvents::decode_log(&RawLog::from(log)) {
                 match decoded {
                     EmailWalletEventsEvents::EmailOpHandledFilter(event) => {
-                        info!(LOG, "event {:?}", event; "func" => function_name!());
+                        warn!(LOG, "event {:?}", event; "func" => function_name!());
                         return Ok((tx_hash, event.registered_unclaim_id));
                     }
                     _ => {
@@ -550,12 +551,12 @@ impl ChainClient {
             .get_transaction_receipt(H256::from_str(tx_hash)?)
             .await?
             .ok_or(anyhow!("No receipt"))?;
-        info!(LOG, "receipt {:?}", receipt; "func" => function_name!());
+        warn!(LOG, "receipt {:?}", receipt; "func" => function_name!());
 
         for log in receipt.logs.into_iter() {
-            info!(LOG, "log {:?}", log; "func" => function_name!());
+            warn!(LOG, "log {:?}", log; "func" => function_name!());
             if let Ok(decoded) = EmailWalletEventsEvents::decode_log(&RawLog::from(log)) {
-                info!(LOG, "decoded {:?}", decoded; "func" => function_name!());
+                warn!(LOG, "decoded {:?}", decoded; "func" => function_name!());
                 match decoded {
                     EmailWalletEventsEvents::UnclaimedFundRegisteredFilter(event) => {
                         if !is_fund {
@@ -705,7 +706,7 @@ impl ChainClient {
             .is_dkim_public_key_hash_valid(domain_name.clone(), public_key_hash)
             .call()
             .await?;
-        info!(
+        warn!(
             LOG,
             "{:?} for {} is already registered: {}", public_key_hash, domain_name, is_valid; "func" => function_name!()
         );
