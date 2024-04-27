@@ -9,6 +9,7 @@ use slog_async;
 use slog_json;
 use slog_term;
 use std::env;
+use slog::Level;
 
 use crate::strings::JSON_LOGGER_KEY;
 
@@ -41,16 +42,15 @@ fn init_logger() -> slog::Logger {
         .fuse();
     let log_terminal_json_drain = slog_json::Json::default(std::io::stdout()).fuse();
 
-    if terminal_json_output {
-        let log_drain =
-            slog_async::Async::new(slog::Duplicate(log_terminal_json_drain, log_file_drain).fuse())
-                .build()
-                .fuse();
-        return slog::Logger::root(log_drain, o!("version" => env!("CARGO_PKG_VERSION")));
-    }
-    let log_drain =
-        slog_async::Async::new(slog::Duplicate(log_terminal_drain, log_file_drain).fuse())
-            .build()
-            .fuse();
-    slog::Logger::root(log_drain, o!("version" => env!("CARGO_PKG_VERSION")))
+    let log_drain = if terminal_json_output {
+        slog::Duplicate(log_terminal_json_drain, log_file_drain).fuse()
+    } else {
+        slog::Duplicate(log_terminal_drain, log_file_drain).fuse()
+    };
+
+    // Tạo một Filter cho mức độ log
+    let level_filter = slog::LevelFilter::new(log_drain, Level::Info).fuse();
+
+    let logger = slog::Logger::root(level_filter, o!("version" => env!("CARGO_PKG_VERSION")));
+    logger
 }
