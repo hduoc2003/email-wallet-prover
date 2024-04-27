@@ -8,20 +8,22 @@ RUN apt install -y cmake build-essential \
 
 RUN apt install -y iputils-ping nano
 
-# Node install
-# RUN npm install -g n
-# RUN n 18
-# RUN npm install -g yarn
-
 WORKDIR /email-wallet
 COPY . .
-# RUN yarn
 
 WORKDIR /email-wallet/packages/relayer
 COPY packages/relayer/.env ./.env
 # COPY packages/relayer/scripts/ ./scripts # FIXME: It's for testing
 RUN cargo build --release
 
+# Node install
+RUN npm install -g n
+RUN n 18
+RUN npm install -g yarn
+WORKDIR /email-wallet
+RUN yarn
+
+WORKDIR /email-wallet/packages/relayer
 CMD [ "/bin/bash", "-c", "/email-wallet/packages/relayer/scripts/startup.sh"]
 
 
